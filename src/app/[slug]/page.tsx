@@ -12,6 +12,7 @@ interface Store {
   id: string;
   store_name: string;
   description: string | null;
+  address: string | null;
   whatsapp_number: string;
   allow_pickup: boolean;
   allow_delivery: boolean;
@@ -49,7 +50,7 @@ export default function StorePublicPage() {
       // Fetch store
       const { data: storeData, error: storeError } = await supabase
         .from("stores")
-        .select("id, store_name, description, whatsapp_number, allow_pickup, allow_delivery, allow_app_delivery, delivery_info")
+        .select("id, store_name, description, address, whatsapp_number, allow_pickup, allow_delivery, allow_app_delivery, delivery_info")
         .eq("slug", slug)
         .single();
 
@@ -123,6 +124,15 @@ export default function StorePublicPage() {
                 <p className="text-sm text-slate-500 dark:text-slate-400 mt-1 line-clamp-2">
                   {store.description}
                 </p>
+              )}
+              {store.address && (
+                <div className="flex items-start mt-2 text-xs text-slate-500 dark:text-slate-400">
+                  <svg className="w-4 h-4 mr-1 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                  <span className="line-clamp-2">{store.address}</span>
+                </div>
               )}
             </div>
           </div>

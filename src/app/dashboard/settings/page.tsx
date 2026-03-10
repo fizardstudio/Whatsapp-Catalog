@@ -18,6 +18,7 @@ export default function SettingsPage() {
   const [allowDelivery, setAllowDelivery] = useState(false);
   const [allowAppDelivery, setAllowAppDelivery] = useState(false);
   const [deliveryInfo, setDeliveryInfo] = useState("");
+  const [address, setAddress] = useState("");
 
   useEffect(() => {
     fetchStore();
@@ -50,6 +51,7 @@ export default function SettingsPage() {
         if (data.allow_delivery !== undefined) setAllowDelivery(data.allow_delivery);
         if (data.allow_app_delivery !== undefined) setAllowAppDelivery(data.allow_app_delivery);
         if (data.delivery_info !== undefined) setDeliveryInfo(data.delivery_info || "");
+        if (data.address !== undefined) setAddress(data.address || "");
       }
     } catch (error) {
       console.error("Error fetching store:", error);
@@ -92,6 +94,7 @@ export default function SettingsPage() {
         allow_delivery: allowDelivery,
         allow_app_delivery: allowAppDelivery,
         delivery_info: deliveryInfo,
+        address: address,
       };
 
       if (storeId) {
@@ -214,6 +217,19 @@ export default function SettingsPage() {
             placeholder="Jelaskan sedikit tentang toko Anda..."
             value={description}
             onChange={(e) => setDescription(e.target.value)}
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+            Alamat Toko (Opsional)
+          </label>
+          <textarea
+            rows={3}
+            className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-white/50 dark:bg-slate-900/50 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500"
+            placeholder="Contoh: Jl. Sudirman No 123, Jakarta"
+            value={address}
+            onChange={(e) => setAddress(e.target.value)}
           />
         </div>
 
