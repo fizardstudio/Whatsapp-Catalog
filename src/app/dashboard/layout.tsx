@@ -63,7 +63,7 @@ export default function DashboardLayout({
       <aside className="w-full md:w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex-shrink-0 flex flex-col transition-colors">
         <div className="p-6 flex items-center justify-between">
           <div>
-            <h2 className="text-xl font-bold text-slate-900 dark:text-white">Fizard</h2>
+            <h2 className="text-xl font-bold text-slate-900 dark:text-white">Orderin</h2>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Merchant Panel</p>
           </div>
           <ThemeToggle />

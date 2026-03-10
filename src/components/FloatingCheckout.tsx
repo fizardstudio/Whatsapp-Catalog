@@ -57,7 +57,8 @@ export default function FloatingCheckout({
     
     const itemsList = items.map((item, index) => {
       const subtotal = item.quantity * item.product.price;
-      return `${index + 1}. ${item.product.emoji} ${item.product.name}\n   ${item.quantity} x Rp ${item.product.price.toLocaleString("id-ID")} = Rp ${subtotal.toLocaleString("id-ID")}`;
+      const noteText = item.note ? `\n   Catatan: ${item.note}` : '';
+      return `${index + 1}. ${item.product.emoji} ${item.product.name}${noteText}\n   ${item.quantity} x Rp ${item.product.price.toLocaleString("id-ID")} = Rp ${subtotal.toLocaleString("id-ID")}`;
     }).join("\n\n");
     
     let methodName = "";
@@ -71,7 +72,8 @@ export default function FloatingCheckout({
       customerInfo += `\n*Alamat:* ${address}`;
     }
 
-    const footer = `\n\n*Subtotal Produk: Rp ${totalPrice.toLocaleString("id-ID")}*\n_(Belum termasuk ongkir)_\n\nTerima kasih!`;
+    const ongkirText = deliveryMethod === "pickup" ? "_(Tanpa ongkir)_" : "_(Belum termasuk ongkir)_";
+    const footer = `\n\n*Subtotal Produk: Rp ${totalPrice.toLocaleString("id-ID")}*\n${ongkirText}\n\nTerima kasih!`;
 
     const message = encodeURIComponent(header + itemsList + customerInfo + footer);
     const waUrl = `https://wa.me/${whatsappNumber}?text=${message}`;

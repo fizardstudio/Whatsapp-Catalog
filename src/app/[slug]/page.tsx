@@ -25,6 +25,7 @@ interface Product {
   name: string;
   price: number;
   emoji: string;
+  description?: string;
 }
 
 export default function StorePublicPage() {
@@ -66,7 +67,7 @@ export default function StorePublicPage() {
       // Fetch active products
       const { data: productsData, error: productsError } = await supabase
         .from("products")
-        .select("id, name, price, emoji")
+        .select("id, name, price, emoji, description")
         .eq("store_id", storeData.id)
         .eq("is_available", true)
         .order("created_at", { ascending: false });
@@ -158,46 +159,72 @@ export default function StorePublicPage() {
               const quantity = cartItem?.quantity || 0;
 
               return (
-                <div key={product.id} className="glass-card bg-white/70 dark:bg-slate-900/70 rounded-2xl p-4 shadow-sm border border-slate-100 dark:border-slate-800 flex items-center gap-4 transition-all hover:shadow-md dark:hover:border-slate-700">
-                  <div className="w-20 h-20 bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center justify-center text-4xl flex-shrink-0 transition-colors">
-                    {product.emoji}
-                  </div>
-                  
-                  <div className="flex-1 min-w-0">
-                    <h3 className="text-base font-bold text-slate-900 dark:text-slate-100 truncate">{product.name}</h3>
-                    <p className="text-blue-600 dark:text-blue-400 font-semibold mt-1">
-                      Rp {product.price.toLocaleString("id-ID")}
-                    </p>
-                  </div>
+                <div key={product.id} className="flex flex-col gap-2">
+                  <div className="glass-card bg-white/70 dark:bg-slate-900/70 rounded-2xl p-4 shadow-sm border border-slate-100 dark:border-slate-800 flex items-center gap-4 transition-all hover:shadow-md dark:hover:border-slate-700">
+                    <div className="w-20 h-20 bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center justify-center text-4xl flex-shrink-0 transition-colors">
+                      {product.emoji}
+                    </div>
+                    
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-base font-bold text-slate-900 dark:text-slate-100 truncate">{product.name}</h3>
+                      {product.description && (
+                        <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-2 leading-snug">
+                          {product.description}
+                        </p>
+                      )}
+                      <p className="text-blue-600 dark:text-blue-400 font-semibold mt-1">
+                        Rp {product.price.toLocaleString("id-ID")}
+                      </p>
+                    </div>
 
-                  <div className="flex-shrink-0">
-                    {quantity === 0 ? (
-                      <button 
-                        onClick={() => addToCart(product)}
-                        className="w-10 h-10 rounded-full bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center hover:bg-blue-100 dark:hover:bg-blue-500/20 transition-colors font-bold text-xl"
-                      >
-                        +
-                      </button>
-                    ) : (
-                      <div className="flex items-center space-x-3 bg-slate-50 dark:bg-slate-800/50 p-1.5 rounded-full border border-slate-200 dark:border-slate-700">
-                        <button 
-                          onClick={() => removeFromCart(product.id)}
-                          className="w-8 h-8 rounded-full bg-white dark:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center shadow-sm hover:text-red-600 dark:hover:text-red-400 transition-colors font-bold"
-                        >
-                          -
-                        </button>
-                        <span className="font-semibold text-sm w-4 text-center text-slate-900 dark:text-white">
-                          {quantity}
-                        </span>
+                    <div className="flex-shrink-0">
+                      {quantity === 0 ? (
                         <button 
                           onClick={() => addToCart(product)}
-                          className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center shadow-sm hover:bg-blue-700 transition-colors font-bold"
+                          className="w-10 h-10 rounded-full bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center hover:bg-blue-100 dark:hover:bg-blue-500/20 transition-colors font-bold text-xl"
                         >
                           +
                         </button>
-                      </div>
-                    )}
+                      ) : (
+                        <div className="flex items-center space-x-3 bg-slate-50 dark:bg-slate-800/50 p-1.5 rounded-full border border-slate-200 dark:border-slate-700">
+                          <button 
+                            onClick={() => removeFromCart(product.id, cartItem?.note)}
+                            className="w-8 h-8 rounded-full bg-white dark:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center shadow-sm hover:text-red-600 dark:hover:text-red-400 transition-colors font-bold"
+                          >
+                            -
+                          </button>
+                          <span className="font-semibold text-sm w-4 text-center text-slate-900 dark:text-white">
+                            {quantity}
+                          </span>
+                          <button 
+                            onClick={() => addToCart(product, cartItem?.note)}
+                            className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center shadow-sm hover:bg-blue-700 transition-colors font-bold"
+                          >
+                            +
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   </div>
+                  {/* Note Section (Only show if item is in cart) */}
+                  {quantity > 0 && (
+                    <div className="pl-24 pr-4 pb-2 animate-in fade-in slide-in-from-top-2">
+                      <input
+                        type="text"
+                        placeholder="Catatan restoran (opsional)..."
+                        className="w-full text-sm px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-900 dark:text-slate-100 placeholder-slate-400"
+                        value={cartItem?.note || ""}
+                        onChange={(e) => {
+                          // To update note, we remove existing and re-add with new note in the store
+                          const newNote = e.target.value;
+                          const qty = cartItem?.quantity || 1;
+                          removeFromCart(product.id, cartItem?.note);
+                          // Add back the same quantity with new note
+                          for(let i=0; i<qty; i++) addToCart(product, newNote);
+                        }}
+                      />
+                    </div>
+                  )}
                 </div>
               );
             })}

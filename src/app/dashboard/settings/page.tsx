@@ -162,7 +162,7 @@ export default function SettingsPage() {
             type="text"
             required
             className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-white/50 dark:bg-slate-900/50 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500"
-            placeholder="Contoh: Fizard Burger"
+            placeholder="Contoh: Orderin Burger"
             value={storeName}
             onChange={handleNameChange}
           />
@@ -174,13 +174,13 @@ export default function SettingsPage() {
           </label>
           <div className="flex">
             <span className="inline-flex items-center px-4 rounded-l-xl border border-r-0 border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-400 sm:text-sm">
-              fizard.shop/
+              orderin.id/
             </span>
             <input
               type="text"
               required
               className="flex-1 min-w-0 block w-full px-4 py-3 rounded-none rounded-r-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-white/50 dark:bg-slate-900/50 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500"
-              placeholder="fizard-burger"
+              placeholder="orderin-burger"
               value={slug}
               onChange={(e) => setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""))}
             />

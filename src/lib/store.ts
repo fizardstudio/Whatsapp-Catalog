@@ -5,17 +5,19 @@ export interface Product {
   name: string;
   price: number;
   emoji: string;
+  description?: string;
 }
 
 export interface CartItem {
   product: Product;
   quantity: number;
+  note?: string;
 }
 
 export interface CartState {
   items: CartItem[];
-  addItem: (product: Product) => void;
-  removeItem: (productId: string) => void;
+  addItem: (product: Product, note?: string) => void;
+  removeItem: (productId: string, note?: string) => void;
   clearCart: () => void;
   getTotalItems: () => number;
   getTotalPrice: () => number;
@@ -23,34 +25,46 @@ export interface CartState {
 
 export const useCartStore = create<CartState>((set, get) => ({
   items: [],
-  addItem: (product) => {
+  addItem: (product, note) => {
     set((state) => {
-      const existingItem = state.items.find(item => item.product.id === product.id);
+      // Find item with same product ID AND same note
+      const existingItem = state.items.find(item => 
+        item.product.id === product.id && item.note === note
+      );
+      
       if (existingItem) {
         return {
           items: state.items.map(item => 
-            item.product.id === product.id 
+            item.product.id === product.id && item.note === note
               ? { ...item, quantity: item.quantity + 1 } 
               : item
           )
         };
       }
-      return { items: [...state.items, { product, quantity: 1 }] };
+      return { items: [...state.items, { product, quantity: 1, note }] };
     });
   },
-  removeItem: (productId) => {
+  removeItem: (productId, note) => {
     set((state) => {
-      const existingItem = state.items.find(item => item.product.id === productId);
+      const existingItem = state.items.find(item => 
+        item.product.id === productId && item.note === note
+      );
+      
       if (existingItem && existingItem.quantity > 1) {
         return {
           items: state.items.map(item => 
-            item.product.id === productId 
+            item.product.id === productId && item.note === note
               ? { ...item, quantity: item.quantity - 1 } 
               : item
           )
         };
       }
-      return { items: state.items.filter(item => item.product.id !== productId) };
+      // Remove entirely if quantity is 1
+      return { 
+        items: state.items.filter(item => 
+          !(item.product.id === productId && item.note === note)
+        ) 
+      };
     });
   },
   clearCart: () => set({ items: [] }),

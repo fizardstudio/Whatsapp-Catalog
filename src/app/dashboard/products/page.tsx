@@ -19,6 +19,7 @@ interface Product {
   price: number;
   emoji: string;
   is_available: boolean;
+  description?: string;
 }
 
 export default function ProductsPage() {
@@ -37,6 +38,7 @@ export default function ProductsPage() {
   const [formName, setFormName] = useState("");
   const [formPrice, setFormPrice] = useState("");
   const [formEmoji, setFormEmoji] = useState("🍔");
+  const [formDescription, setFormDescription] = useState("");
   const [formAvailable, setFormAvailable] = useState(true);
 
   useEffect(() => {
@@ -84,6 +86,7 @@ export default function ProductsPage() {
     setFormName("");
     setFormPrice("");
     setFormEmoji("🍔");
+    setFormDescription("");
     setFormAvailable(true);
     setIsModalOpen(true);
     setShowEmojiPicker(false);
@@ -94,6 +97,7 @@ export default function ProductsPage() {
     setFormName(product.name);
     setFormPrice(product.price.toString());
     setFormEmoji(product.emoji);
+    setFormDescription(product.description || "");
     setFormAvailable(product.is_available);
     setIsModalOpen(true);
     setShowEmojiPicker(false);
@@ -123,6 +127,7 @@ export default function ProductsPage() {
       name: formName,
       price: parseFloat(formPrice),
       emoji: formEmoji,
+      description: formDescription,
       is_available: formAvailable
     };
 
@@ -237,7 +242,12 @@ export default function ProductsPage() {
                         <span className="text-2xl bg-slate-100 dark:bg-slate-800 w-12 h-12 flex items-center justify-center rounded-xl">
                           {product.emoji}
                         </span>
-                        <span className="font-medium text-slate-900 dark:text-slate-100">{product.name}</span>
+                        <div>
+                          <span className="font-medium text-slate-900 dark:text-slate-100 block">{product.name}</span>
+                          {product.description && (
+                            <span className="text-sm text-slate-500 dark:text-slate-400 block line-clamp-1 mt-0.5">{product.description}</span>
+                          )}
+                        </div>
                       </div>
                     </td>
                     <td className="px-6 py-4 text-slate-600 dark:text-slate-300">
@@ -354,6 +364,19 @@ export default function ProductsPage() {
                     )}
                   </div>
                 </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                  Deskripsi Produk (Opsional)
+                </label>
+                <textarea
+                  rows={2}
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white/50 dark:bg-slate-900/50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500"
+                  placeholder="Contoh: Burger sapi dengan keju leleh dan saus spesial"
+                  value={formDescription}
+                  onChange={(e) => setFormDescription(e.target.value)}
+                />
               </div>
 
               <div className="flex items-center space-x-3 pt-2">

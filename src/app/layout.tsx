@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Katalog WhatsApp | Fizard",
+  title: "Katalog WhatsApp | Orderin",
   description: "SaaS pemesanan langsung ke WhatsApp untuk UMKM",
 };
 

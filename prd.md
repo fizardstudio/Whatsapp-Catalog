@@ -1,4 +1,4 @@
-PRD — Dokumen Persyaratan Proyek: Fizard Katalog ke WA
+PRD — Dokumen Persyaratan Proyek: Orderin Katalog ke WA
 
 <!--
 Konteks: PRD ini mendefinisikan ruang lingkup, fitur, alur pengguna, dan arsitektur
@@ -24,7 +24,7 @@ Input Data: Input data dilakukan secara manual oleh penjual melalui Dashboard un
 
 Mekanisme Pesanan: Tidak memerlukan payment gateway (gerbang pembayaran) untuk versi MVP. Proses checkout murni mengarahkan pengguna ke API WhatsApp (wa.me) dengan teks URL yang sudah dienkripsi.
 
-URL Toko: Setiap toko mendapatkan URL publik yang unik berdasarkan slug (contoh: fizard.shop/[slug]).
+URL Toko: Setiap toko mendapatkan URL publik yang unik berdasarkan slug (contoh: orderin.id/[slug]).
 
 3. Fitur Inti (Core Features)
 
@@ -70,7 +70,7 @@ Buat Toko: Penjual masuk ke Dashboard, memasukkan Nama Toko, Slug, dan Nomor Wha
 
 Setup Menu: Penjual masuk ke menu Produk, menambahkan item (contoh: "Burger Keju", "25000", "🍔").
 
-Bagikan: Penjual membagikan tautan unik mereka (/fizard-burger) di bio Instagram/WhatsApp mereka.
+Bagikan: Penjual membagikan tautan unik mereka (/orderin-burger) di bio Instagram/WhatsApp mereka.
 
 B. Alur Pelanggan (Pemesanan)
 

@@ -85,7 +85,7 @@ export default function RegisterPage() {
           <div className="bg-gradient-to-br from-blue-600 to-violet-600 w-16 h-16 rounded-2xl mx-auto mb-6 flex items-center justify-center shadow-lg shadow-blue-500/30">
             <span className="text-3xl font-bold text-white">F</span>
           </div>
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">Daftar Fizard</h1>
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">Daftar Orderin</h1>
           <p className="text-slate-500 dark:text-slate-400">Mulai buat katalog WhatsApp Anda sekarang</p>
         </div>
 
