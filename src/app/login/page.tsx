@@ -10,13 +10,16 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [resending, setResending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
   const router = useRouter();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
+    setSuccess(null);
 
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
@@ -39,6 +42,35 @@ export default function LoginPage() {
     }
   };
 
+  const handleResendConfirmation = async () => {
+    if (!email) {
+      setError("Silakan masukkan alamat email Anda terlebih dahulu untuk mengirim ulang konfirmasi.");
+      return;
+    }
+    
+    setResending(true);
+    setError(null);
+    setSuccess(null);
+
+    try {
+      const { error } = await supabase.auth.resend({
+        type: 'signup',
+        email: email,
+      });
+
+      if (error) throw error;
+      setSuccess("Tautan konfirmasi baru telah dikirim! Silakan periksa kotak masuk (atau folder spam) Anda.");
+    } catch (err: any) {
+      if (err.status === 429) {
+          setError("Tunggu beberapa saat sebelum meminta tautan konfirmasi baru.");
+      } else {
+        setError(err.message || "Gagal mengirim ulang email konfirmasi.");
+      }
+    } finally {
+      setResending(false);
+    }
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-slate-50 dark:bg-slate-950 transition-colors relative overflow-hidden">
       {/* Decorative gradient blobs */}
@@ -57,6 +89,11 @@ export default function LoginPage() {
         {error && (
           <div className="mb-6 p-4 bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 rounded-xl text-sm border border-red-100 dark:border-red-500/20">
             {error}
+          </div>
+        )}
+        {success && (
+          <div className="mb-6 p-4 bg-green-50 dark:bg-green-500/10 text-green-700 dark:text-green-400 rounded-xl text-sm border border-green-100 dark:border-green-500/20">
+            {success}
           </div>
         )}
 
@@ -104,6 +141,17 @@ export default function LoginPage() {
             )}
           </button>
         </form>
+
+        <div className="mt-6 text-center">
+             <button
+                type="button"
+                onClick={handleResendConfirmation}
+                disabled={resending || loading}
+                className="text-sm text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors disabled:opacity-50 underline decoration-slate-300 dark:decoration-slate-700 underline-offset-4"
+              >
+                {resending ? "Mengirim ulang..." : "Belum menerima email konfirmasi? Kirim ulang"}
+              </button>
+        </div>
 
         <div className="mt-8 pt-6 border-t border-slate-100 dark:border-slate-800/50 text-center text-sm text-slate-500 dark:text-slate-400">
           Belum punya akun?{" "}
