@@ -379,8 +379,8 @@ export default function ProductsPage() {
                 />
               </div>
 
-              <div className="flex items-center space-x-3 pt-2">
-                <div className="relative inline-flex items-center cursor-pointer">
+              <label className="flex items-center space-x-3 pt-2 cursor-pointer w-max">
+                <div className="relative inline-flex items-center">
                   <input 
                     type="checkbox" 
                     className="sr-only peer"
@@ -392,7 +392,7 @@ export default function ProductsPage() {
                 <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
                   {formAvailable ? "Produk Tersedia" : "Produk Habis"}
                 </span>
-              </div>
+              </label>
 
               <div className="pt-4 flex gap-3">
                 <button
