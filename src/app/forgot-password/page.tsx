@@ -6,8 +6,9 @@ import { supabase } from "@/lib/supabase";
 import { Loader2, Store, ArrowLeft } from "lucide-react";
 
 // --- KONTEKS UNTUK BANG FIRMAN (FIZARD STUDIO) ---
-// Versi 100% Clean. Bebas dari mock/kode tiruan.
-// Siap jalan di localhost Next.js Abang.
+// Perbaikan: Mengarahkan redirectTo ke /auth/callback agar sesi reset password
+// tertangkap dengan benar oleh server (Next.js App Router).
+// Link di email nantinya akan mampir ke callback dulu baru ke update-password.
 
 export default function ForgotPasswordPage() {
     const [email, setEmail] = useState("");
@@ -22,8 +23,12 @@ export default function ForgotPasswordPage() {
         setSuccess(false);
 
         try {
+            // Ambil origin secara dinamis (localhost atau orderin.store)
+            const origin = typeof window !== 'undefined' ? window.location.origin : '';
+
             const { error } = await supabase.auth.resetPasswordForEmail(email, {
-                redirectTo: `${window.location.origin}/update-password`,
+                // PERBAIKAN: Redirect ke jembatan callback terlebih dahulu
+                redirectTo: `${origin}/auth/callback?next=/update-password`,
             });
 
             if (error) {
@@ -44,11 +49,11 @@ export default function ForgotPasswordPage() {
             <div className="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 bg-blue-500/20 dark:bg-blue-600/10 rounded-full blur-3xl pointer-events-none"></div>
             <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-80 h-80 bg-purple-500/20 dark:bg-purple-600/10 rounded-full blur-3xl pointer-events-none"></div>
 
-            <div className="w-full max-w-md glass-card rounded-3xl p-8 sm:p-10 relative z-10 bg-white dark:bg-slate-900 shadow-xl border border-slate-100 dark:border-slate-800">
+            <div className="w-full max-w-md glass-card rounded-3xl p-8 sm:p-10 relative z-10 bg-white dark:bg-slate-900 shadow-xl border border-slate-100 dark:border-slate-800 transition-all">
 
                 {/* Tombol Kembali */}
-                <Link href="/login" className="inline-flex items-center text-sm font-medium text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors mb-6">
-                    <ArrowLeft className="w-4 h-4 mr-2" />
+                <Link href="/login" className="inline-flex items-center text-sm font-medium text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors mb-6 group">
+                    <ArrowLeft className="w-4 h-4 mr-2 transform group-hover:-translate-x-1 transition-transform" />
                     Kembali ke Login
                 </Link>
 
@@ -68,18 +73,17 @@ export default function ForgotPasswordPage() {
                         Masukkan email Anda dan kami akan mengirimkan tautan untuk mengatur ulang kata sandi.
                     </p>
                 </div>
-                {/* ----------------------------------------------- */}
 
                 {error && (
-                    <div className="mb-6 p-4 bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 rounded-xl text-sm border border-red-100 dark:border-red-500/20">
+                    <div className="mb-6 p-4 bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 rounded-xl text-sm border border-red-100 dark:border-red-500/20 animate-in fade-in slide-in-from-top-1">
                         {error}
                     </div>
                 )}
 
                 {success ? (
-                    <div className="text-center p-6 bg-green-50 dark:bg-green-500/10 rounded-2xl border border-green-100 dark:border-green-500/20">
+                    <div className="text-center p-6 bg-green-50 dark:bg-green-500/10 rounded-2xl border border-green-100 dark:border-green-500/20 animate-in zoom-in-95">
                         <div className="w-12 h-12 bg-green-100 dark:bg-green-500/20 text-green-600 dark:text-green-400 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)">
+                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                             </svg>
                         </div>
@@ -122,13 +126,11 @@ export default function ForgotPasswordPage() {
                 )}
             </div>
 
-            {/* Footer Fizard Studio Infrastructure */}
             <div className="absolute bottom-6 w-full text-center pointer-events-none">
                 <p className="text-slate-400 dark:text-slate-600 text-[10px] font-medium uppercase tracking-[0.2em]">
                     Secured by Fizard Studio Infrastructure
                 </p>
             </div>
-
         </div>
     );
 }
