@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Loader2, Store } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { supabase } from "@/lib/supabase";
+import { createClient } from "@/utils/supabase/client";
 
 export default function UpdatePasswordPage() {
     const [password, setPassword] = useState("");
@@ -20,6 +20,7 @@ export default function UpdatePasswordPage() {
 
         try {
             // Fungsi bawaan Supabase untuk memperbarui kata sandi user yang sedang memiliki sesi reset
+            const supabase = createClient();
             const { error } = await supabase.auth.updateUser({
                 password: password,
             });

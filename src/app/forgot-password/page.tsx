@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { supabase } from "@/lib/supabase";
+import { createClient } from "@/utils/supabase/client";
 import { Loader2, Store, ArrowLeft } from "lucide-react";
 
 // --- KONTEKS UNTUK BANG FIRMAN (FIZARD STUDIO) ---
@@ -26,6 +26,7 @@ export default function ForgotPasswordPage() {
             // Ambil origin secara dinamis (localhost atau orderin.store)
             const origin = typeof window !== 'undefined' ? window.location.origin : '';
 
+            const supabase = createClient();
             const { error } = await supabase.auth.resetPasswordForEmail(email, {
                 // PERBAIKAN: Redirect ke jembatan callback terlebih dahulu
                 redirectTo: `${origin}/auth/callback?next=/update-password`,
