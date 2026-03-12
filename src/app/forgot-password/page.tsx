@@ -28,8 +28,8 @@ export default function ForgotPasswordPage() {
 
             const supabase = createClient();
             const { error } = await supabase.auth.resetPasswordForEmail(email, {
-                // PERBAIKAN: Redirect ke jembatan callback terlebih dahulu
-                redirectTo: `${origin}/auth/callback?next=/update-password`,
+                // PERBAIKAN: Redirect ke rute khusus reset password tanpa parameter query
+                redirectTo: `${origin}/auth/reset-callback`,
             });
 
             if (error) {
