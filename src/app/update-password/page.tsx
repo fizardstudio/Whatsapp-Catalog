@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Loader2, Store } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -11,23 +11,58 @@ export default function UpdatePasswordPage() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState(false);
+    
+    // State baru untuk memastikan user datang dari link recovery di email
+    const [isRecoverySession, setIsRecoverySession] = useState(false);
+    const [checkingSession, setCheckingSession] = useState(true);
+
     const router = useRouter();
+
+    useEffect(() => {
+        const supabase = createClient();
+        
+        // Listener aktif untuk membaca event dari hash fragment (#access_token=...)
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(
+            (event, session) => {
+                if (event === 'PASSWORD_RECOVERY') {
+                    setIsRecoverySession(true);
+                    setCheckingSession(false);
+                } else if (!isRecoverySession) {
+                    // Cek jika sudah login namun bukan dari recovery (bisa diabaikan/redirect)
+                    setCheckingSession(false);
+                }
+            }
+        );
+
+        // Kasih jeda waktu tunggu untuk membaca hash URL
+        const timer = setTimeout(() => {
+            setCheckingSession(false);
+        }, 1500);
+
+        return () => {
+            subscription.unsubscribe();
+            clearTimeout(timer);
+        };
+    }, [isRecoverySession]);
 
     const handleUpdatePassword = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
         setError(null);
 
+        if (!isRecoverySession) {
+             setError("Sesi pemulihan tidak valid atau sudah kedaluwarsa. Silakan minta tautan baru.");
+             setLoading(false);
+             return;
+        }
+
         try {
-            // Fungsi bawaan Supabase untuk memperbarui kata sandi user yang sedang memiliki sesi reset
             const supabase = createClient();
             const { error } = await supabase.auth.updateUser({
                 password: password,
             });
 
-            if (error) {
-                throw error;
-            }
+            if (error) throw error;
 
             setSuccess(true);
         } catch (err: any) {
@@ -36,6 +71,15 @@ export default function UpdatePasswordPage() {
             setLoading(false);
         }
     };
+
+    if (checkingSession) {
+        return (
+            <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-slate-50 dark:bg-slate-950">
+                 <Loader2 className="w-8 h-8 text-blue-600 animate-spin mb-4" />
+                 <p className="text-slate-500 text-sm">Memverifikasi tautan rahasi...</p>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen flex items-center justify-center p-4 bg-slate-50 dark:bg-slate-950 transition-colors relative overflow-hidden">
