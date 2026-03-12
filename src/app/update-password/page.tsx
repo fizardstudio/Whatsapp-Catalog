@@ -21,13 +21,25 @@ export default function UpdatePasswordPage() {
     useEffect(() => {
         const supabase = createClient();
         
-        // Listener aktif untuk membaca event dari hash fragment (#access_token=...)
+        // 1. Cek langsung apakah sesi sudah ada (mungkin listener terlambat)
+        const checkInitialSession = async () => {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session) {
+                setIsRecoverySession(true);
+                setCheckingSession(false);
+            }
+        };
+        checkInitialSession();
+
+        // 2. Listener aktif untuk membaca event dari hash fragment (#access_token=...)
         const { data: { subscription } } = supabase.auth.onAuthStateChange(
             (event, session) => {
-                if (event === 'PASSWORD_RECOVERY') {
-                    setIsRecoverySession(true);
+                if (event === 'PASSWORD_RECOVERY' || event === 'SIGNED_IN') {
+                    if (session) {
+                        setIsRecoverySession(true);
+                    }
                     setCheckingSession(false);
-                } else if (!isRecoverySession) {
+                } else if (!isRecoverySession && event === 'SIGNED_OUT') {
                     // Cek jika sudah login namun bukan dari recovery (bisa diabaikan/redirect)
                     setCheckingSession(false);
                 }
@@ -37,13 +49,13 @@ export default function UpdatePasswordPage() {
         // Kasih jeda waktu tunggu untuk membaca hash URL
         const timer = setTimeout(() => {
             setCheckingSession(false);
-        }, 1500);
+        }, 2000); // Naikkan jadi 2 detik untuk jaga-jaga koneksi lambat
 
         return () => {
             subscription.unsubscribe();
             clearTimeout(timer);
         };
-    }, [isRecoverySession]);
+    }, []); // Hapus dependency isRecoverySession agar tidak infinite loop/remount
 
     const handleUpdatePassword = async (e: React.FormEvent) => {
         e.preventDefault();
