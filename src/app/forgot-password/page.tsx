@@ -23,13 +23,14 @@ export default function ForgotPasswordPage() {
         setSuccess(false);
 
         try {
-            // Ambil origin secara dinamis (localhost atau orderin.store)
-            const origin = typeof window !== 'undefined' ? window.location.origin : '';
+            // Kita hardcode url pasti ke website abang untuk menghilangkan potensi
+            // masalah dari typeof window.location.origin saat running di mode spesifik.
+            const targetUrl = 'https://orderin.store/update-password';
 
             const supabase = createClient();
             const { error } = await supabase.auth.resetPasswordForEmail(email, {
-                // PERBAIKAN: Redirect langsung ke client tanpa jembatan API
-                redirectTo: `${origin}/update-password`,
+                // PERBAIKAN: Gunakan URL pasti
+                redirectTo: targetUrl,
             });
 
             if (error) {
