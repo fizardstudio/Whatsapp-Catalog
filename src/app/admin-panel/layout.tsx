@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
-import { Loader2, ShieldAlert } from "lucide-react";
+import { Loader2, ShieldAlert, LogOut } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
 // === PENGATURAN SUPER ADMIN ===
@@ -45,6 +45,11 @@ export default function AdminLayout({
     checkAdminAccess();
   }, [router]);
 
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    router.replace("/login");
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-900">
@@ -70,6 +75,13 @@ export default function AdminLayout({
               {ADMIN_EMAIL}
             </div>
             <ThemeToggle />
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg border border-slate-700 text-sm font-medium"
+            >
+              <LogOut className="w-4 h-4" />
+              <span className="hidden sm:inline">Keluar</span>
+            </button>
           </div>
         </div>
       </nav>
