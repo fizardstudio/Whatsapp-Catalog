@@ -53,7 +53,7 @@ export default function StorePublicPage() {
       // Fetch store
       const { data: storeData, error: storeError } = await supabase
         .from("stores")
-        .select("id, store_name, description, address, whatsapp_number, allow_pickup, allow_delivery, allow_app_delivery, delivery_info, coins")
+        .select("id, store_name, description, address, whatsapp_number, allow_pickup, allow_delivery, allow_app_delivery, delivery_info, coins, is_banned")
         .eq("slug", slug)
         .single();
 
@@ -65,6 +65,11 @@ export default function StorePublicPage() {
       }
 
       setStore(storeData);
+      
+      // Banned Lock
+      if (storeData.is_banned) {
+        throw new Error("Toko ini telah dibekukan sementara oleh Admin karena melanggar Syarat dan Ketentuan layanan.");
+      }
 
       // Lock down the store if out of coins
       if (storeData.coins <= 0) {
