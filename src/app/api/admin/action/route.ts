@@ -1,21 +1,32 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@/utils/supabase/server";
-import { createClient as createSupabaseClient } from "@supabase/supabase-js";
+import { createClient } from "@supabase/supabase-js";
 
 // === PENGATURAN SUPER ADMIN ===
 const ADMIN_EMAIL = "fizard.studio@gmail.com";
 
 export async function POST(request: Request) {
   try {
-    // 1. Verifikasi Sesi & Email menggunakan cookie server (Mengecek Siapa yang Login)
-    const supabase = await createClient();
-    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+    // 0. Ambil Token dari Header Request (karena frontend pakai LocalStorage)
+    const authHeader = request.headers.get("Authorization");
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return NextResponse.json({ error: "Missing authorization token" }, { status: 401 });
+    }
+    const token = authHeader.replace("Bearer ", "");
+
+    // 1. Verifikasi Email Admin dengan mencocokkan Token JWT ke Supabase
+    const anonSupabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      { auth: { autoRefreshToken: false, persistSession: false } }
+    );
+
+    const { data: { user }, error: userError } = await anonSupabase.auth.getUser(token);
     
-    if (sessionError || !session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    if (userError || !user) {
+      return NextResponse.json({ error: "Unauthorized (Token Invalid/Expired)" }, { status: 401 });
     }
 
-    if (session.user.email !== ADMIN_EMAIL) {
+    if (user.email !== ADMIN_EMAIL) {
       return NextResponse.json({ error: "Forbidden: Admin access only" }, { status: 403 });
     }
 
@@ -30,7 +41,7 @@ export async function POST(request: Request) {
     // === BYPASS RLS (Admin Client) ===
     // Karena kita tidak mematikan RLS di Supabase, permintaan tulis/ubah tetap butuh wewenang super.
     // Kita membuat client khusus "Service Role" yang kebal hukum RLS.
-    const adminSupabase = createSupabaseClient(
+    const adminSupabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.SUPABASE_SERVICE_ROLE_KEY!,
       {

@@ -78,9 +78,15 @@ export default function AdminDashboard() {
   const handleAction = async (action: string, storeId: string, merchantId: string, data?: any) => {
     setActionLoading(storeId + action);
     try {
+      // Dapatkan token akses dari sesi yang aktif (localStorage)
+      const { data: { session } } = await supabase.auth.getSession();
+      
       const response = await fetch("/api/admin/action", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${session?.access_token || ''}`
+        },
         body: JSON.stringify({ action, storeId, merchantId, data })
       });
 
