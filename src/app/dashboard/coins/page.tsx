@@ -57,7 +57,7 @@ export default function CoinsPage() {
   };
 
   const handleTopUpWhatsApp = () => {
-    const message = encodeURIComponent(`Halo Admin Orderin, saya ingin Top-Up Koin untuk toko saya.\n\nMohon info nomor rekening belanjanya ya. Terima kasih!`);
+    const message = encodeURIComponent(`Halo Admin Orderin, \n\nSaya sudah melakukan transfer sebesar Rp________ untuk pembelian koin toko saya: [Nama Toko Anda].\n\nBerikut saya lampirkan bukti transfernya. Terima kasih!`);
     window.open(`https://wa.me/6285777551485?text=${message}`, "_blank");
   };
 
@@ -136,6 +136,33 @@ export default function CoinsPage() {
               </div>
               <div className="font-bold text-amber-600 dark:text-amber-500">Rp 50.000</div>
             </div>
+          </div>
+
+          {/* Instruksi Transfer Bank */}
+          <div className="mt-6 bg-blue-50 dark:bg-blue-900/20 rounded-2xl p-4 border border-blue-100 dark:border-blue-800/50">
+            <h3 className="text-sm font-bold text-blue-900 dark:text-blue-400 mb-2">Cara Top-Up Koin:</h3>
+            <ol className="text-xs text-blue-800 dark:text-blue-300 space-y-2 mb-4 list-decimal pl-4">
+              <li>Pilih paket koin yang ingin dibeli.</li>
+              <li>Transfer dana sesuai harga paket ke rekening berikut:</li>
+            </ol>
+            
+            <div className="bg-white dark:bg-slate-900 p-3 rounded-xl border border-slate-200 dark:border-slate-700 mb-4 flex items-center justify-between">
+              <div>
+                <div className="text-xs text-slate-500 font-medium">Bank BCA</div>
+                <div className="font-mono text-sm font-bold text-slate-900 dark:text-white tracking-widest mt-0.5">1234 567 890</div>
+                <div className="text-xs text-slate-500">a.n. Firman Orderin</div>
+              </div>
+              <button 
+                onClick={() => navigator.clipboard.writeText("1234567890")}
+                className="text-xs text-blue-600 dark:text-blue-400 font-semibold bg-blue-50 dark:bg-blue-900/30 px-3 py-1.5 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors"
+              >
+                Salin Rekening
+              </button>
+            </div>
+
+            <p className="text-xs text-blue-800 dark:text-blue-300">
+              3. Setelah transfer, klik tombol <strong>"Top Up Koin Sekarang"</strong> di atas untuk mengirim bukti transfer via WhatsApp ke Admin. Sebutkan nama toko Anda.
+            </p>
           </div>
         </div>
       </div>
