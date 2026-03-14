@@ -1,12 +1,13 @@
 import { NextResponse } from "next/server";
-import { supabase } from "@/lib/supabase";
+import { createClient } from "@/utils/supabase/server";
 
 // === PENGATURAN SUPER ADMIN ===
 const ADMIN_EMAIL = "fizard.studio@gmail.com";
 
 export async function POST(request: Request) {
   try {
-    // 1. Verifikasi Sesi & Email (Gatekeeper tingkat Server)
+    // 1. Verifikasi Sesi & Email menggunakan cookie server
+    const supabase = await createClient();
     const { data: { session }, error: sessionError } = await supabase.auth.getSession();
     
     if (sessionError || !session) {
