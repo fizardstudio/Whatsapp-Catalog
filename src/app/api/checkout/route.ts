@@ -50,9 +50,9 @@ export async function POST(request: Request) {
     // --- 3. DEDUCT COIN & LOG TRANSACTION ---
     // Decrease by 1
     const { error: updateError } = await supabase
-      .from("merchants")
+      .from("stores")
       .update({ coins: store.coins - 1 })
-      .eq("id", store.merchant_id);
+      .eq("id", storeId);
 
     if (updateError) {
       throw updateError;

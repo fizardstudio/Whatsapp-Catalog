@@ -28,14 +28,14 @@ export default function CoinsPage() {
       const userId = session.user.id;
 
       // Fetch current coins
-      const { data: merchantData } = await supabase
-        .from("merchants")
+      const { data: storeData } = await supabase
+        .from("stores")
         .select("coins")
-        .eq("id", userId)
+        .eq("merchant_id", userId)
         .single();
         
-      if (merchantData) {
-        setCurrentCoins(merchantData.coins);
+      if (storeData) {
+        setCurrentCoins(storeData.coins);
       }
 
       // Fetch transaction history

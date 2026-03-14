@@ -25,14 +25,14 @@ export default function DashboardLayout({
         router.replace("/login");
       } else {
         // Fetch coin balance
-        const { data: merchantData } = await supabase
-          .from("merchants")
+        const { data: storeData } = await supabase
+          .from("stores")
           .select("coins")
-          .eq("id", session.user.id)
+          .eq("merchant_id", session.user.id)
           .single();
           
-        if (merchantData) {
-          setCoins(merchantData.coins);
+        if (storeData) {
+          setCoins(storeData.coins);
         }
         setLoading(false);
       }
