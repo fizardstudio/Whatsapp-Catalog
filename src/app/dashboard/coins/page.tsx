@@ -15,6 +15,13 @@ export default function CoinsPage() {
   const [loading, setLoading] = useState(true);
   const [transactions, setTransactions] = useState<CoinTransaction[]>([]);
   const [currentCoins, setCurrentCoins] = useState<number>(0);
+  const [storeName, setStoreName] = useState<string>("");
+  const [selectedPackage, setSelectedPackage] = useState<"coba" | "laris" | null>(null);
+
+  const packages = {
+    coba: { name: "Paket Coba-Coba", coins: 50, price: 25000 },
+    laris: { name: "Paket Laris Manis", coins: 100, price: 50000 },
+  };
 
   useEffect(() => {
     fetchCoinData();
@@ -27,15 +34,16 @@ export default function CoinsPage() {
 
       const userId = session.user.id;
 
-      // Fetch current coins
+      // Fetch current coins and store name
       const { data: storeData } = await supabase
         .from("stores")
-        .select("coins")
+        .select("coins, store_name")
         .eq("merchant_id", userId)
         .single();
         
       if (storeData) {
         setCurrentCoins(storeData.coins);
+        setStoreName(storeData.store_name);
       }
 
       // Fetch transaction history
@@ -57,7 +65,13 @@ export default function CoinsPage() {
   };
 
   const handleTopUpWhatsApp = () => {
-    const message = encodeURIComponent(`Halo Admin Orderin, \n\nSaya sudah melakukan transfer sebesar Rp________ untuk pembelian koin toko saya: [Nama Toko Anda].\n\nBerikut saya lampirkan bukti transfernya. Terima kasih!`);
+    if (!selectedPackage) {
+      alert("Silakan pilih paket koin terlebih dahulu!");
+      return;
+    }
+    
+    const pkg = packages[selectedPackage];
+    const message = encodeURIComponent(`Halo Admin Orderin, \n\nSaya ingin Top-Up *${pkg.name} (${pkg.coins} Koin)* seharga *Rp ${pkg.price.toLocaleString("id-ID")}*.\nSaya sudah melakukan transfer. Berikut saya lampirkan bukti transfernya.\n\nNama Toko: *${storeName || "Toko Saya"}*`);
     window.open(`https://wa.me/6285777551485?text=${message}`, "_blank");
   };
 
@@ -120,22 +134,38 @@ export default function CoinsPage() {
           </p>
 
           <div className="grid sm:grid-cols-2 gap-4">
-            <div className="border border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 p-4 rounded-2xl flex items-center justify-between">
+            {/* Paket Coba-Coba */}
+            <button 
+              onClick={() => setSelectedPackage("coba")}
+              className={`text-left p-4 rounded-2xl flex items-center justify-between transition-all border-2 ${
+                selectedPackage === "coba" 
+                  ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20 shadow-md ring-4 ring-blue-500/10" 
+                  : "border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 hover:border-blue-200 dark:hover:border-blue-800"
+              }`}
+            >
               <div>
                 <div className="text-sm font-bold text-slate-900 dark:text-white">Paket Coba-Coba</div>
                 <div className="text-xs text-slate-500 mt-0.5">Dapat 50 Koin</div>
               </div>
               <div className="font-bold text-blue-600 dark:text-blue-400">Rp 25.000</div>
-            </div>
+            </button>
             
-            <div className="border border-amber-200 dark:border-amber-900/50 bg-amber-50 dark:bg-amber-900/10 p-4 rounded-2xl flex items-center justify-between relative overflow-hidden">
+            {/* Paket Laris Manis */}
+            <button 
+              onClick={() => setSelectedPackage("laris")}
+              className={`text-left p-4 rounded-2xl flex items-center justify-between relative overflow-hidden transition-all border-2 ${
+                selectedPackage === "laris"
+                  ? "border-amber-500 bg-amber-50 dark:bg-amber-900/20 shadow-md ring-4 ring-amber-500/10"
+                  : "border-amber-200 dark:border-amber-900/50 bg-amber-50/50 dark:bg-amber-900/10 hover:border-amber-300 dark:hover:border-amber-700/50"
+              }`}
+            >
               <div className="absolute top-0 right-0 bg-amber-500 text-white text-[9px] font-bold px-2 py-0.5 rounded-bl-lg">TERLARIS</div>
               <div>
                 <div className="text-sm font-bold text-slate-900 dark:text-white">Paket Laris Manis</div>
                 <div className="text-xs text-slate-500 mt-0.5">Dapat 100 Koin</div>
               </div>
               <div className="font-bold text-amber-600 dark:text-amber-500">Rp 50.000</div>
-            </div>
+            </button>
           </div>
 
           {/* Instruksi Transfer Bank */}
