@@ -125,7 +125,22 @@ export default function DashboardLayout({
           })}
         </nav>
 
-        <div className="p-4 mt-auto border-t border-slate-200 dark:border-slate-800">
+        <div className="p-4 mt-auto border-t border-slate-200 dark:border-slate-800 space-y-2">
+          {/* Help Button */}
+          <button
+            onClick={() => {
+              const msg = encodeURIComponent("Halo Admin Orderin, saya butuh Bantuan / ingin lapor masalah terkait toko saya:");
+              window.open(`https://wa.me/6285777551485?text=${msg}`, "_blank");
+            }}
+            className="flex items-center space-x-3 px-4 py-3 w-full rounded-xl bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 font-medium hover:bg-green-100 dark:hover:bg-green-900/40 transition-colors"
+          >
+            <svg className="h-5 w-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span>Bantuan & Laporan</span>
+          </button>
+          
+          {/* Logout Button */}
           <button
             onClick={handleLogout}
             className="flex items-center space-x-3 px-4 py-3 w-full rounded-xl text-slate-600 dark:text-slate-400 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-700 dark:hover:text-red-400 transition-colors"

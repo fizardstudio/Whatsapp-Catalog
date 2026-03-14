@@ -1,4 +1,5 @@
 import { Store, MessageCircle, TrendingUp, ArrowRight, Zap, ShieldCheck, Wallet, Database, Smartphone, Sparkles, CheckCircle2, Coins } from 'lucide-react';
+import FaqAccordion from '@/components/FaqAccordion';
 
 /**
  * CONTEXT FOR BANG FIRMAN (FIZARD STUDIO):
@@ -242,6 +243,21 @@ export default function LandingPage() {
               </p>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* --- SECTION FAQ (PERTANYAAN UMUM) --- */}
+      <section className="py-24 bg-white dark:bg-slate-950/50 transition-colors">
+        <div className="max-w-6xl mx-auto px-6">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-4">Pertanyaan yang Sering Diajukan</h2>
+            <p className="text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
+              Pelajari lebih lanjut bagaimana Orderin melindungi bisnis Anda dan mempermudah transaksi via WhatsApp.
+            </p>
+          </div>
+          
+          <FaqAccordion />
+          
         </div>
       </section>
 

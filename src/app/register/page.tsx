@@ -12,6 +12,7 @@ export default function RegisterPage() {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
@@ -150,9 +151,29 @@ export default function RegisterPage() {
             />
           </div>
 
+          <div className="flex items-start gap-3 mt-4 mb-2">
+            <div className="flex items-center h-5 mt-0.5">
+              <input
+                id="terms"
+                type="checkbox"
+                required
+                className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 dark:border-slate-700 dark:bg-slate-900 dark:checked:bg-blue-500"
+                checked={acceptedTerms}
+                onChange={(e) => setAcceptedTerms(e.target.checked)}
+              />
+            </div>
+            <label htmlFor="terms" className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+              Saya menyetujui{" "}
+              <Link href="/terms" target="_blank" className="text-blue-600 dark:text-blue-400 font-medium hover:underline">
+                Syarat & Ketentuan
+              </Link>
+              {" "}serta Kebijakan Privasi dari Orderin.
+            </label>
+          </div>
+
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || !acceptedTerms}
             className="w-full bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-700 hover:to-violet-700 text-white font-medium py-3.5 px-4 rounded-xl transition-all shadow-lg shadow-blue-500/30 flex items-center justify-center disabled:opacity-70 disabled:cursor-not-allowed mt-4"
           >
             {loading ? (
