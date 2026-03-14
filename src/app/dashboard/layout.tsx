@@ -14,6 +14,7 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const [loading, setLoading] = useState(true);
+  const [coins, setCoins] = useState(0);
   const router = useRouter();
   const pathname = usePathname();
 
@@ -23,6 +24,16 @@ export default function DashboardLayout({
       if (!session) {
         router.replace("/login");
       } else {
+        // Fetch coin balance
+        const { data: merchantData } = await supabase
+          .from("merchants")
+          .select("coins")
+          .eq("id", session.user.id)
+          .single();
+          
+        if (merchantData) {
+          setCoins(merchantData.coins);
+        }
         setLoading(false);
       }
     };
@@ -67,6 +78,31 @@ export default function DashboardLayout({
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Merchant Panel</p>
           </div>
           <ThemeToggle />
+        </div>
+        
+        {/* Coin Balance Widget */}
+        <div className="px-4 mb-6">
+          <div className="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/10 border border-amber-200/50 dark:border-amber-700/30 rounded-2xl p-4 shadow-[inset_0_1px_rgba(255,255,255,0.4)] dark:shadow-none">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm font-semibold text-amber-900 dark:text-amber-500">Saldo Koin Anda</span>
+              <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400">Orderin</span>
+            </div>
+            <div className="flex items-end gap-1">
+              <span className="text-3xl font-black text-amber-600 dark:text-amber-400 tracking-tight leading-none">{coins}</span>
+              <span className="text-sm font-medium text-amber-700/70 dark:text-amber-500/70 mb-0.5">koin</span>
+            </div>
+            {coins <= 5 && (
+              <p className="text-xs text-red-600 dark:text-red-400 font-medium mt-2 animate-pulse">
+                Hati-hati, koin hampir habis!
+              </p>
+            )}
+            <Link 
+              href="/dashboard/coins"
+              className="mt-3 w-full block text-center py-2 px-3 bg-amber-500 hover:bg-amber-600 dark:bg-amber-600 dark:hover:bg-amber-500 text-white dark:text-white text-xs font-bold rounded-xl transition-colors shadow-sm"
+            >
+              Top Up & Riwayat Koin
+            </Link>
+          </div>
         </div>
         
         <nav className="px-4 pb-6 space-y-1">

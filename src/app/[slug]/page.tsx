@@ -18,6 +18,7 @@ interface Store {
   allow_delivery: boolean;
   allow_app_delivery: boolean;
   delivery_info: string | null;
+  coins: number;
 }
 
 interface Product {
@@ -51,7 +52,7 @@ export default function StorePublicPage() {
       // Fetch store
       const { data: storeData, error: storeError } = await supabase
         .from("stores")
-        .select("id, store_name, description, address, whatsapp_number, allow_pickup, allow_delivery, allow_app_delivery, delivery_info")
+        .select("id, store_name, description, address, whatsapp_number, allow_pickup, allow_delivery, allow_app_delivery, delivery_info, coins")
         .eq("slug", slug)
         .single();
 
@@ -63,6 +64,11 @@ export default function StorePublicPage() {
       }
 
       setStore(storeData);
+
+      // Lock down the store if out of coins
+      if (storeData.coins <= 0) {
+        throw new Error("Toko ini sedang tidak menerima pesanan saat ini.");
+      }
 
       // Fetch active products
       const { data: productsData, error: productsError } = await supabase
@@ -234,6 +240,7 @@ export default function StorePublicPage() {
       
       {/* Floating Checkout */}
       <FloatingCheckout 
+        storeId={store.id}
         storeName={store.store_name} 
         whatsappNumber={store.whatsapp_number} 
         allowPickup={store.allow_pickup}

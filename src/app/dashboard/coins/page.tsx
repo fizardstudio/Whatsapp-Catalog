@@ -1,0 +1,190 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { supabase } from "@/lib/supabase";
+import { Loader2, Coins, Receipt, ArrowUpRight, ArrowDownLeft, Wallet, AlertCircle } from "lucide-react";
+
+interface CoinTransaction {
+  id: string;
+  amount: number;
+  description: string;
+  created_at: string;
+}
+
+export default function CoinsPage() {
+  const [loading, setLoading] = useState(true);
+  const [transactions, setTransactions] = useState<CoinTransaction[]>([]);
+  const [currentCoins, setCurrentCoins] = useState<number>(0);
+
+  useEffect(() => {
+    fetchCoinData();
+  }, []);
+
+  const fetchCoinData = async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
+      const userId = session.user.id;
+
+      // Fetch current coins
+      const { data: merchantData } = await supabase
+        .from("merchants")
+        .select("coins")
+        .eq("id", userId)
+        .single();
+        
+      if (merchantData) {
+        setCurrentCoins(merchantData.coins);
+      }
+
+      // Fetch transaction history
+      const { data: txData, error: txError } = await supabase
+        .from("coin_transactions")
+        .select("*")
+        .eq("merchant_id", userId)
+        .order("created_at", { ascending: false })
+        .limit(50);
+
+      if (!txError && txData) {
+        setTransactions(txData);
+      }
+    } catch (error) {
+      console.error("Error fetching coin data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleTopUpWhatsApp = () => {
+    const message = encodeURIComponent(`Halo Admin Orderin, saya ingin Top-Up Koin untuk toko saya.\n\nMohon info nomor rekening belanjanya ya. Terima kasih!`);
+    window.open(`https://wa.me/6285777551485?text=${message}`, "_blank");
+  };
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center py-20">
+        <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="max-w-4xl mx-auto space-y-6">
+      <div>
+        <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Koin & Tagihan</h1>
+        <p className="text-slate-500 dark:text-slate-400 mt-1">Kelola saldo koin pendaftaran pesanan toko Anda.</p>
+      </div>
+
+      <div className="grid md:grid-cols-3 gap-6">
+        
+        {/* Wallet Card */}
+        <div className="md:col-span-1 bg-gradient-to-br from-amber-500 to-orange-600 rounded-3xl p-6 text-white shadow-lg relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl -mr-10 -mt-10"></div>
+          <div className="absolute bottom-0 left-0 w-24 h-24 bg-black/10 rounded-full blur-xl -ml-5 -mb-5"></div>
+          
+          <div className="relative z-10">
+            <div className="flex items-center justify-between opacity-90 mb-4">
+              <span className="font-medium text-amber-50">Sisa Koin Anda</span>
+              <Wallet className="w-6 h-6" />
+            </div>
+            <div className="flex items-baseline gap-2 mb-1">
+              <span className="text-5xl font-black tracking-tight">{currentCoins}</span>
+              <span className="font-medium text-amber-100">Koin</span>
+            </div>
+            
+            {currentCoins <= 5 && (
+              <div className="mt-4 bg-red-500/80 backdrop-blur-sm px-3 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 border border-red-400/50 text-white">
+                <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                <span>Koin hampir habis! Toko Anda tidak bisa menerima pesanan jika saldo 0.</span>
+              </div>
+            )}
+            
+            <button 
+              onClick={handleTopUpWhatsApp}
+              className="mt-6 w-full bg-white text-orange-600 hover:bg-orange-50 font-bold py-3 rounded-xl transition-colors shadow-sm active:scale-95"
+            >
+              Top Up Koin Sekarang
+            </button>
+          </div>
+        </div>
+
+        {/* Pricing Info */}
+        <div className="md:col-span-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm">
+          <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+            <Coins className="w-5 h-5 text-amber-500" />
+            Informasi Harga Top-Up
+          </h2>
+          <p className="text-slate-600 dark:text-slate-400 text-sm mb-6 leading-relaxed">
+            Orderin menggunakan sistem adil (Pay-as-you-go). Koin Anda HANYA dipotong 1x (-Rp 500) saat pembeli mengirimkan format pesanan checkout ke WhatsApp Anda. Bebas biaya langganan bulanan!
+          </p>
+
+          <div className="grid sm:grid-cols-2 gap-4">
+            <div className="border border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 p-4 rounded-2xl flex items-center justify-between">
+              <div>
+                <div className="text-sm font-bold text-slate-900 dark:text-white">Paket Coba-Coba</div>
+                <div className="text-xs text-slate-500 mt-0.5">Dapat 50 Koin</div>
+              </div>
+              <div className="font-bold text-blue-600 dark:text-blue-400">Rp 25.000</div>
+            </div>
+            
+            <div className="border border-amber-200 dark:border-amber-900/50 bg-amber-50 dark:bg-amber-900/10 p-4 rounded-2xl flex items-center justify-between relative overflow-hidden">
+              <div className="absolute top-0 right-0 bg-amber-500 text-white text-[9px] font-bold px-2 py-0.5 rounded-bl-lg">TERLARIS</div>
+              <div>
+                <div className="text-sm font-bold text-slate-900 dark:text-white">Paket Laris Manis</div>
+                <div className="text-xs text-slate-500 mt-0.5">Dapat 100 Koin</div>
+              </div>
+              <div className="font-bold text-amber-600 dark:text-amber-500">Rp 50.000</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Transaction History */}
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl overflow-hidden shadow-sm">
+        <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-800 p-6">
+          <h2 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+            <Receipt className="w-5 h-5 text-slate-400" />
+            Riwayat Pemakaian Koin
+          </h2>
+        </div>
+        
+        {transactions.length === 0 ? (
+          <div className="p-8 text-center text-slate-500 dark:text-slate-400">
+            Belum ada riwayat transaksi koin.
+          </div>
+        ) : (
+          <div className="divide-y divide-slate-100 dark:divide-slate-800">
+            {transactions.map((tx) => (
+              <div key={tx.id} className="p-4 sm:px-6 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                <div className="flex items-center gap-4">
+                  <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
+                    tx.amount > 0 
+                      ? "bg-green-100 text-green-600 dark:bg-green-500/20 dark:text-green-400" 
+                      : "bg-red-100 text-red-600 dark:bg-red-500/20 dark:text-red-400"
+                  }`}>
+                    {tx.amount > 0 ? <ArrowUpRight className="w-5 h-5" /> : <ArrowDownLeft className="w-5 h-5" />}
+                  </div>
+                  <div>
+                    <div className="font-medium text-sm text-slate-900 dark:text-white">{tx.description}</div>
+                    <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                      {new Date(tx.created_at).toLocaleDateString('id-ID', { 
+                        day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' 
+                      })}
+                    </div>
+                  </div>
+                </div>
+                <div className={`font-bold ${
+                  tx.amount > 0 ? "text-green-600 dark:text-green-400" : "text-slate-900 dark:text-white"
+                }`}>
+                  {tx.amount > 0 ? "+" : ""}{tx.amount}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+      
+    </div>
+  );
+}

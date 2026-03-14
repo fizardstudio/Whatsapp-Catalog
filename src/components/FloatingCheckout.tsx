@@ -5,6 +5,7 @@ import { MessageCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 
 interface FloatingCheckoutProps {
+  storeId: string;
   storeName: string;
   whatsappNumber: string;
   allowPickup: boolean;
@@ -14,6 +15,7 @@ interface FloatingCheckoutProps {
 }
 
 export default function FloatingCheckout({ 
+  storeId,
   storeName, 
   whatsappNumber, 
   allowPickup, 
@@ -50,38 +52,62 @@ export default function FloatingCheckout({
 
   if (totalItems === 0) return null;
 
-  const handleCheckout = (e: React.FormEvent) => {
+  const handleCheckout = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const header = `Halo *${storeName}*, saya ingin memesan:\n\n`;
-    
-    const itemsList = items.map((item, index) => {
-      const subtotal = item.quantity * item.product.price;
-      const noteText = item.note ? `\n   Catatan: ${item.note}` : '';
-      return `${index + 1}. ${item.product.emoji} ${item.product.name}${noteText}\n   ${item.quantity} x Rp ${item.product.price.toLocaleString("id-ID")} = Rp ${subtotal.toLocaleString("id-ID")}`;
-    }).join("\n\n");
-    
-    let methodName = "";
-    if (deliveryMethod === "pickup") methodName = "Ambil Sendiri (Pickup)";
-    else if (deliveryMethod === "delivery") methodName = "Pesan Antar (Internal)";
-    else methodName = "Ojek Online (Gojek/Grab)";
+    try {
+      // 1. DEDUCT COIN VIA API (with Anti-Spam Check)
+      const res = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          storeId: storeId,
+          storeName: storeName 
+        })
+      });
 
-    let customerInfo = `\n\n*Nama Pemesan:* ${customerName}\n*Metode:* ${methodName}`;
-    
-    if (deliveryMethod === "delivery" || deliveryMethod === "app_delivery") {
-      customerInfo += `\n*Alamat:* ${address}`;
+      const data = await res.json();
+
+      if (!res.ok) {
+        alert(data.error || "Gagal memproses pesanan. Silahkan coba lagi.");
+        return;
+      }
+
+      // 2. SUCCESS! SEND TO WHATSAPP
+      const header = `Halo *${storeName}*, saya ingin memesan:\n\n`;
+      
+      const itemsList = items.map((item, index) => {
+        const subtotal = item.quantity * item.product.price;
+        const noteText = item.note ? `\n   Catatan: ${item.note}` : '';
+        return `${index + 1}. ${item.product.emoji} ${item.product.name}${noteText}\n   ${item.quantity} x Rp ${item.product.price.toLocaleString("id-ID")} = Rp ${subtotal.toLocaleString("id-ID")}`;
+      }).join("\n\n");
+      
+      let methodName = "";
+      if (deliveryMethod === "pickup") methodName = "Ambil Sendiri (Pickup)";
+      else if (deliveryMethod === "delivery") methodName = "Pesan Antar (Internal)";
+      else methodName = "Ojek Online (Gojek/Grab)";
+
+      let customerInfo = `\n\n*Nama Pemesan:* ${customerName}\n*Metode:* ${methodName}`;
+      
+      if (deliveryMethod === "delivery" || deliveryMethod === "app_delivery") {
+        customerInfo += `\n*Alamat:* ${address}`;
+      }
+
+      const ongkirText = deliveryMethod === "pickup" ? "_(Tanpa ongkir)_" : "_(Belum termasuk ongkir)_";
+      const footer = `\n\n*Subtotal Produk: Rp ${totalPrice.toLocaleString("id-ID")}*\n${ongkirText}\n\nTerima kasih!`;
+
+      const message = encodeURIComponent(header + itemsList + customerInfo + footer);
+      const waUrl = `https://wa.me/${whatsappNumber}?text=${message}`;
+
+      // Clear cart upon successful forward to WA
+      setShowModal(false);
+      clearCart();
+      window.open(waUrl, "_blank");
+      
+    } catch (error) {
+      console.error(error);
+      alert("Terjadi kesalahan sistem. Coba lagi.");
     }
-
-    const ongkirText = deliveryMethod === "pickup" ? "_(Tanpa ongkir)_" : "_(Belum termasuk ongkir)_";
-    const footer = `\n\n*Subtotal Produk: Rp ${totalPrice.toLocaleString("id-ID")}*\n${ongkirText}\n\nTerima kasih!`;
-
-    const message = encodeURIComponent(header + itemsList + customerInfo + footer);
-    const waUrl = `https://wa.me/${whatsappNumber}?text=${message}`;
-
-    // Clear cart upon successful forward to WA
-    setShowModal(false);
-    clearCart();
-    window.open(waUrl, "_blank");
   };
 
   return (
