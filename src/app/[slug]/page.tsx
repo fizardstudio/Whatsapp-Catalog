@@ -41,6 +41,7 @@ export default function StorePublicPage() {
   // Cart state access
   const addToCart = useCartStore((state: CartState) => state.addItem);
   const removeFromCart = useCartStore((state: CartState) => state.removeItem);
+  const updateItemNote = useCartStore((state: CartState) => state.updateItemNote);
   const items = useCartStore((state: CartState) => state.items);
 
   useEffect(() => {
@@ -221,12 +222,7 @@ export default function StorePublicPage() {
                         className="w-full text-sm px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-900 dark:text-slate-100 placeholder-slate-400"
                         value={cartItem?.note || ""}
                         onChange={(e) => {
-                          // To update note, we remove existing and re-add with new note in the store
-                          const newNote = e.target.value;
-                          const qty = cartItem?.quantity || 1;
-                          removeFromCart(product.id, cartItem?.note);
-                          // Add back the same quantity with new note
-                          for(let i=0; i<qty; i++) addToCart(product, newNote);
+                          updateItemNote(product.id, e.target.value);
                         }}
                       />
                     </div>
