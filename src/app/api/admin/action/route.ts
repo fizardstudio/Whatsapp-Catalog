@@ -1,12 +1,13 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
+import { createServerClient } from "@supabase/ssr";
 
 // === PENGATURAN SUPER ADMIN ===
 const ADMIN_EMAIL = "fizard.studio@gmail.com";
 
 export async function POST(request: Request) {
   try {
-    // 1. Verifikasi Sesi & Email menggunakan cookie server
+    // 1. Verifikasi Sesi & Email menggunakan cookie server (Mengecek Siapa yang Login)
     const supabase = await createClient();
     const { data: { session }, error: sessionError } = await supabase.auth.getSession();
     
@@ -26,7 +27,21 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
-    // 3. Eksekusi Aksi berdasarkan tipe
+    // === BYPASS RLS (Admin Client) ===
+    // Karena kita tidak mematikan RLS di Supabase, permintaan tulis/ubah tetap butuh wewenang super.
+    // Kita membuat client khusus "Service Role" yang kebal hukum RLS.
+    const adminSupabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!,
+      {
+        cookies: {
+          getAll() { return [] }, // Tidak butuh cookie Auth untuk Service Key
+          setAll() {}
+        }
+      }
+    );
+
+    // 3. Eksekusi Aksi berdasarkan tipe meggunakan adminSupabase
     switch (action) {
       case "ADD_COINS":
         const amountToAdd = Number(data.amount);
@@ -34,8 +49,8 @@ export async function POST(request: Request) {
           return NextResponse.json({ error: "Invalid coin amount" }, { status: 400 });
         }
 
-        // Ambil koin sekarang
-        const { data: storeCurrent, error: fetchError } = await supabase
+        // Ambil koin sekarang (Bebas RLS)
+        const { data: storeCurrent, error: fetchError } = await adminSupabase
           .from("stores")
           .select("coins")
           .eq("id", storeId)
@@ -45,19 +60,19 @@ export async function POST(request: Request) {
           throw new Error("Store not found");
         }
 
-        // Tambah koin
-        const { error: updateCoinError } = await supabase
+        // Tambah koin (Bebas RLS)
+        const { error: updateCoinError } = await adminSupabase
           .from("stores")
           .update({ coins: storeCurrent.coins + amountToAdd })
           .eq("id", storeId);
 
         if (updateCoinError) throw updateCoinError;
 
-        // Catat di Coin Transactions
-        const { error: txError } = await supabase
+        // Catat di Coin Transactions (Bebas RLS)
+        const { error: txError } = await adminSupabase
           .from("coin_transactions")
           .insert({
-            merchant_id: merchantId, // Penting diikat ke UMKM pemilik toko
+            merchant_id: merchantId, 
             amount: amountToAdd,
             description: `Top-Up (+${amountToAdd} Koin) oleh Sistem Admin`
           });
@@ -68,7 +83,8 @@ export async function POST(request: Request) {
       case "TOGGLE_BAN":
         const { is_banned } = data;
         
-        const { error: banError } = await supabase
+        // Update menggunakan adminSupabase (Bebas RLS)
+        const { error: banError } = await adminSupabase
           .from("stores")
           .update({ is_banned: is_banned })
           .eq("id", storeId);
