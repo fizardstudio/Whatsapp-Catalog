@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
-import { createServerClient } from "@supabase/ssr";
+import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 
 // === PENGATURAN SUPER ADMIN ===
 const ADMIN_EMAIL = "fizard.studio@gmail.com";
@@ -30,13 +30,13 @@ export async function POST(request: Request) {
     // === BYPASS RLS (Admin Client) ===
     // Karena kita tidak mematikan RLS di Supabase, permintaan tulis/ubah tetap butuh wewenang super.
     // Kita membuat client khusus "Service Role" yang kebal hukum RLS.
-    const adminSupabase = createServerClient(
+    const adminSupabase = createSupabaseClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.SUPABASE_SERVICE_ROLE_KEY!,
       {
-        cookies: {
-          getAll() { return [] }, // Tidak butuh cookie Auth untuk Service Key
-          setAll() {}
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false
         }
       }
     );
